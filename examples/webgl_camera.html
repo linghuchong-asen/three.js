@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - cameras</title>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+		/>
+		<link type="text/css" rel="stylesheet" href="main.css" />
+		<style>
+			b {
+				color: lightgreen;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>
+			- cameras<br />
+			<b>O</b> orthographic <b>P</b> perspective
+		</div>
+
+		<script type="module">
+			import * as THREE from '../build/three.module.js';
+
+			import Stats from './jsm/libs/stats.module.js';
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+
+			const SCREEN_WIDTH = window.innerWidth;
+			const SCREEN_HEIGHT = window.innerHeight;
+			const aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+			let container, stats;
+			let camera, scene, renderer, mesh;
+			let cameraRig, activeCamera, activeHelper;
+			let cameraPerspective, cameraOrtho;
+			let cameraPerspectiveHelper, cameraOrthoHelper;
+			const frustumSize = 600;
+
+			init();
+			// animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene = new THREE.Scene();
+				const axis = new THREE.AxesHelper( 2000 );
+				scene.add( axis );
+
+				//
+
+				camera = new THREE.PerspectiveCamera( 50, 0.5 * aspect, 1, 10000 );
+				camera.position.z = 2500;
+
+				cameraPerspective = new THREE.PerspectiveCamera(
+					50,
+					0.5 * aspect,
+					150,
+					1000
+				);
+				cameraPerspective.position.set( 10, 200, 10 );
+				cameraPerspective.lookAt( 0, 0, 0 );
+
+				cameraPerspectiveHelper = new THREE.CameraHelper( cameraPerspective );
+				scene.add( cameraPerspectiveHelper );
+
+				//
+
+				renderer = new THREE.WebGLRenderer( );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				container.appendChild( renderer.domElement );
+				render();
+			
+
+}
+
+//
+
+			function render() {
+
+				renderer.render( scene, camera );
+				const control = new OrbitControls( camera, renderer.domElement );
+				control.addEventListener( 'change', () => {
+
+					renderer.render( scene, camera );
+			
+	} );
+
+}
+
+			//
+
+			// function onKeyDown( event ) {
+
+			// 	switch ( event.keyCode ) {
+
+			// 		case 79: /*O*/
+
+			// 			activeCamera = cameraOrtho;
+			// 			activeHelper = cameraOrthoHelper;
+
+			// 			break;
+
+			// 		case 80: /*P*/
+
+			// 			activeCamera = cameraPerspective;
+			// 			activeHelper = cameraPerspectiveHelper;
+
+			// 			break;
+
+			// 	}
+
+			// }
+
+			//
+
+			// function onWindowResize() {
+
+			// 	SCREEN_WIDTH = window.innerWidth;
+			// 	SCREEN_HEIGHT = window.innerHeight;
+			// 	aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+			// 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+			// 	camera.aspect = 0.5 * aspect;
+			// 	camera.updateProjectionMatrix();
+
+			// 	// cameraPerspective.aspect = 0.5 * aspect;
+			// 	// cameraPerspective.updateProjectionMatrix();
+
+			// 	cameraOrtho.left = - 0.5 * frustumSize * aspect / 2;
+			// 	cameraOrtho.right = 0.5 * frustumSize * aspect / 2;
+			// 	cameraOrtho.top = frustumSize / 2;
+			// 	cameraOrtho.bottom = - frustumSize / 2;
+			// 	cameraOrtho.updateProjectionMatrix();
+
+			// }
+
+			//
+
+			// function animate() {
+
+			// 	requestAnimationFrame( animate );
+
+			// 	render();
+			// 	stats.update();
+
+			// }
+		</script>
+	</body>
+</html>
