@@ -33,28 +33,45 @@ class Sprite extends Object3D {
 		super();
 
 		this.type = 'Sprite';
-
+		// 这也是一种默认参数的写法
 		if ( _geometry === undefined ) {
 
 			_geometry = new BufferGeometry();
+
+			 /* 精灵是一个矩形的面；5个点一组；前3个点是裁剪空间坐标，z值都为0；后2个点是uv坐标；
+			 还有一点没有明白的是Sprite是用的gl.LINE_LOOP还是gl.TRIANGLES;官方文档说是面，那一定就是gl.TRIANGLES
+			 有一点没有明白，裁剪空间中设置的是0.5，那都占用裁剪空间的一半了，为什么加载出来没有占用屏幕的一半？引申出来比如一个立方体长宽高设置的都是100，three.js会怎么样转换为空间裁剪坐标？
+			 */
 
 			const float32Array = new Float32Array( [
 				- 0.5, - 0.5, 0, 0, 0,
 				0.5, - 0.5, 0, 1, 0,
 				0.5, 0.5, 0, 1, 1,
-				- 0.5, 0.5, 0, 0, 1
+				- 0.5, 0.5, 0, 0, 1,
 			] );
-
+			// 这里为什么会有占5个元素的情形，空间三维坐标，多出来的两个是什么，莫非是uv信息
+			/* InterleavedBuffer
+			"交叉存储" 表明多个类型的 attributes （例如，顶点位置、法向量、UV 和颜色值）被存储到一个队列中。 */
 			const interleavedBuffer = new InterleavedBuffer( float32Array, 5 );
 
-			_geometry.setIndex( [ 0, 1, 2,	0, 2, 3 ] );
-			_geometry.setAttribute( 'position', new InterleavedBufferAttribute( interleavedBuffer, 3, 0, false ) );
-			_geometry.setAttribute( 'uv', new InterleavedBufferAttribute( interleavedBuffer, 2, 3, false ) );
+			// 设置缓存的index
+			_geometry.setIndex( [ 0, 1, 2, 0, 2, 3 ] );
+			/* InterleavedBufferAttribute
+				构造函数
+				InterleavedBufferAttribute( interleavedBuffer : InterleavedBuffer, itemSize : Integer, offset : Integer, normalized : Boolean ) */
+			_geometry.setAttribute(
+				'position',
+				new InterleavedBufferAttribute( interleavedBuffer, 3, 0, false )
+			);
+			_geometry.setAttribute(
+				'uv',
+				new InterleavedBufferAttribute( interleavedBuffer, 2, 3, false )
+			);
 
 		}
 
 		this.geometry = _geometry;
-		this.material = ( material !== undefined ) ? material : new SpriteMaterial();
+		this.material = material !== undefined ? material : new SpriteMaterial();
 
 		this.center = new Vector2( 0.5, 0.5 );
 
@@ -64,18 +81,26 @@ class Sprite extends Object3D {
 
 		if ( raycaster.camera === null ) {
 
-			console.error( 'THREE.Sprite: "Raycaster.camera" needs to be set in order to raycast against sprites.' );
+			console.error(
+				'THREE.Sprite: "Raycaster.camera" needs to be set in order to raycast against sprites.'
+			);
 
 		}
 
 		_worldScale.setFromMatrixScale( this.matrixWorld );
 
 		_viewWorldMatrix.copy( raycaster.camera.matrixWorld );
-		this.modelViewMatrix.multiplyMatrices( raycaster.camera.matrixWorldInverse, this.matrixWorld );
+		this.modelViewMatrix.multiplyMatrices(
+			raycaster.camera.matrixWorldInverse,
+			this.matrixWorld
+		);
 
 		_mvPosition.setFromMatrixPosition( this.modelViewMatrix );
 
-		if ( raycaster.camera.isPerspectiveCamera && this.material.sizeAttenuation === false ) {
+		if (
+			raycaster.camera.isPerspectiveCamera &&
+			this.material.sizeAttenuation === false
+		) {
 
 			_worldScale.multiplyScalar( - _mvPosition.z );
 
@@ -93,24 +118,64 @@ class Sprite extends Object3D {
 
 		const center = this.center;
 
-		transformVertex( _vA.set( - 0.5, - 0.5, 0 ), _mvPosition, center, _worldScale, sin, cos );
-		transformVertex( _vB.set( 0.5, - 0.5, 0 ), _mvPosition, center, _worldScale, sin, cos );
-		transformVertex( _vC.set( 0.5, 0.5, 0 ), _mvPosition, center, _worldScale, sin, cos );
+		transformVertex(
+			_vA.set( - 0.5, - 0.5, 0 ),
+			_mvPosition,
+			center,
+			_worldScale,
+			sin,
+			cos
+		);
+		transformVertex(
+			_vB.set( 0.5, - 0.5, 0 ),
+			_mvPosition,
+			center,
+			_worldScale,
+			sin,
+			cos
+		);
+		transformVertex(
+			_vC.set( 0.5, 0.5, 0 ),
+			_mvPosition,
+			center,
+			_worldScale,
+			sin,
+			cos
+		);
 
 		_uvA.set( 0, 0 );
 		_uvB.set( 1, 0 );
 		_uvC.set( 1, 1 );
 
 		// check first triangle
-		let intersect = raycaster.ray.intersectTriangle( _vA, _vB, _vC, false, _intersectPoint );
+		let intersect = raycaster.ray.intersectTriangle(
+			_vA,
+			_vB,
+			_vC,
+			false,
+			_intersectPoint
+		);
 
 		if ( intersect === null ) {
 
 			// check second triangle
-			transformVertex( _vB.set( - 0.5, 0.5, 0 ), _mvPosition, center, _worldScale, sin, cos );
+			transformVertex(
+				_vB.set( - 0.5, 0.5, 0 ),
+				_mvPosition,
+				center,
+				_worldScale,
+				sin,
+				cos
+			);
 			_uvB.set( 0, 1 );
 
-			intersect = raycaster.ray.intersectTriangle( _vA, _vC, _vB, false, _intersectPoint );
+			intersect = raycaster.ray.intersectTriangle(
+				_vA,
+				_vC,
+				_vB,
+				false,
+				_intersectPoint
+			);
 			if ( intersect === null ) {
 
 				return;
@@ -124,13 +189,20 @@ class Sprite extends Object3D {
 		if ( distance < raycaster.near || distance > raycaster.far ) return;
 
 		intersects.push( {
-
 			distance: distance,
 			point: _intersectPoint.clone(),
-			uv: Triangle.getUV( _intersectPoint, _vA, _vB, _vC, _uvA, _uvB, _uvC, new Vector2() ),
+			uv: Triangle.getUV(
+				_intersectPoint,
+				_vA,
+				_vB,
+				_vC,
+				_uvA,
+				_uvB,
+				_uvC,
+				new Vector2()
+			),
 			face: null,
-			object: this
-
+			object: this,
 		} );
 
 	}
@@ -154,20 +226,22 @@ Sprite.prototype.isSprite = true;
 function transformVertex( vertexPosition, mvPosition, center, scale, sin, cos ) {
 
 	// compute position in camera space
-	_alignedPosition.subVectors( vertexPosition, center ).addScalar( 0.5 ).multiply( scale );
+	_alignedPosition
+		.subVectors( vertexPosition, center )
+		.addScalar( 0.5 )
+		.multiply( scale );
 
 	// to check if rotation is not zero
 	if ( sin !== undefined ) {
 
-		_rotatedPosition.x = ( cos * _alignedPosition.x ) - ( sin * _alignedPosition.y );
-		_rotatedPosition.y = ( sin * _alignedPosition.x ) + ( cos * _alignedPosition.y );
+		_rotatedPosition.x = cos * _alignedPosition.x - sin * _alignedPosition.y;
+		_rotatedPosition.y = sin * _alignedPosition.x + cos * _alignedPosition.y;
 
 	} else {
 
 		_rotatedPosition.copy( _alignedPosition );
 
 	}
-
 
 	vertexPosition.copy( mvPosition );
 	vertexPosition.x += _rotatedPosition.x;

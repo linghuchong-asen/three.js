@@ -152,7 +152,7 @@
 				container.appendChild( stats.dom );
 
 				//
-
+			
 				window.addEventListener( 'resize', onWindowResize );
 				document.addEventListener( 'pointermove', onPointerMove );
 
@@ -178,15 +178,15 @@
 
 				requestAnimationFrame( animate );
 
-				render();
+				// render();
 				stats.update();
 
 			}
-
+			
 			function render() {
 
-				particles.rotation.x += 0.0005;
-				particles.rotation.y += 0.001;
+				// particles.rotation.x += 0.0005;
+				// particles.rotation.y += 0.001;
 
 				const geometry = particles.geometry;
 				const attributes = geometry.attributes;
@@ -194,6 +194,8 @@
 				raycaster.setFromCamera( pointer, camera );
 
 				intersects = raycaster.intersectObject( particles );
+				console.log( particles );
+				console.log( intersects );
 
 				if ( intersects.length > 0 ) {
 
@@ -220,6 +222,7 @@
 
 			}
 
+			
 		</script>
 
 	</body>

@@ -63,6 +63,8 @@ class Object3D extends EventDispatcher {
 		rotation._onChange( onRotationChange );
 		quaternion._onChange( onQuaternionChange );
 
+		/*  通过defineProperties定义属性的描述符为布尔类型的，默认均为false；这里没有列举出来writable，所以这个属性是不可以修改的；
+		所以当你想要修改物体的位置mesh.position = new THREE.Vector3(1,1,1) 是没有作用的;修改位置只有两个方法mesh.position.x=5;或mesh.position.set(1,1,1)这是拿到了position，position是个Vector3,上面有x,y,z属性和set()方法 */
 		Object.defineProperties( this, {
 			position: {
 				configurable: true,
