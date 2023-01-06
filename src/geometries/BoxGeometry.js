@@ -61,7 +61,7 @@ class BoxGeometry extends BufferGeometry {
 			const segmentWidth = width / gridX; // 宽除以分段数，一段的长度
 			const segmentHeight = height / gridY;
 
-			const widthHalf = width / 2; // 宽度的一半 你
+			const widthHalf = width / 2; // 宽度的一半
 			const heightHalf = height / 2;
 			const depthHalf = depth / 2;
 
@@ -86,6 +86,9 @@ class BoxGeometry extends BufferGeometry {
 
 					// set values to correct vector component 设置值以校正矢量分量
 					/* uvw是形参，xyz是实参 */
+					/* 变换正负号，能实现变换点顺序的效果;结合点的索引能确定面正确的方向，three.js中逆时针旋转是面的正方向；
+					作者编写这段算法时，应该也是迭代了好几次才成现在这样，不然很难想象能一下子就知道这样写，或者对数学很敏感，能快速的找到顶点之间的规律；
+					再或者是借鉴了其他的库 */
 					vector[ u ] = x * udir; // 7.5 -7.5 z
 					vector[ v ] = y * vdir; // 7.5 -7.5 y
 					vector[ w ] = depthHalf; // 7.5 x
@@ -95,7 +98,7 @@ class BoxGeometry extends BufferGeometry {
 					vertices.push( vector.x, vector.y, vector.z );
 
 					// set values to correct vector component
-
+					/* 法向量，因为面是平行于坐标轴的，所以一个方向的值就可以代表法向量 */
 					vector[ u ] = 0;
 					vector[ v ] = 0;
 					vector[ w ] = depth > 0 ? 1 : - 1;
@@ -105,7 +108,7 @@ class BoxGeometry extends BufferGeometry {
 					normals.push( vector.x, vector.y, vector.z );
 
 					// uvs
-
+					/* 纹理坐标 */
 					uvs.push( ix / gridX );
 					uvs.push( 1 - ( iy / gridY ) );
 
