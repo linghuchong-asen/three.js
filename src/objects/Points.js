@@ -14,7 +14,10 @@ const _position = /*@__PURE__*/ new Vector3();
 class Points extends Object3D {
 
 	// 这是一种类的，默认参数的写法
-	constructor( geometry = new BufferGeometry(), material = new PointsMaterial() ) {
+	constructor(
+		geometry = new BufferGeometry(),
+		material = new PointsMaterial()
+	) {
 
 		super();
 
@@ -60,7 +63,8 @@ class Points extends Object3D {
 		_inverseMatrix.copy( matrixWorld ).invert();
 		_ray.copy( raycaster.ray ).applyMatrix4( _inverseMatrix );
 
-		const localThreshold = threshold / ( ( this.scale.x + this.scale.y + this.scale.z ) / 3 );
+		const localThreshold =
+			threshold / ( ( this.scale.x + this.scale.y + this.scale.z ) / 3 );
 		const localThresholdSq = localThreshold * localThreshold;
 
 		if ( geometry.isBufferGeometry ) {
@@ -72,7 +76,7 @@ class Points extends Object3D {
 			if ( index !== null ) {
 
 				const start = Math.max( 0, drawRange.start );
-				const end = Math.min( index.count, ( drawRange.start + drawRange.count ) );
+				const end = Math.min( index.count, drawRange.start + drawRange.count );
 
 				for ( let i = start, il = end; i < il; i ++ ) {
 
@@ -80,20 +84,39 @@ class Points extends Object3D {
 
 					_position.fromBufferAttribute( positionAttribute, a );
 
-					testPoint( _position, a, localThresholdSq, matrixWorld, raycaster, intersects, this );
+					testPoint(
+						_position,
+						a,
+						localThresholdSq,
+						matrixWorld,
+						raycaster,
+						intersects,
+						this
+					);
 
 				}
 
 			} else {
 
 				const start = Math.max( 0, drawRange.start );
-				const end = Math.min( positionAttribute.count, ( drawRange.start + drawRange.count ) );
+				const end = Math.min(
+					positionAttribute.count,
+					drawRange.start + drawRange.count
+				);
 
 				for ( let i = start, l = end; i < l; i ++ ) {
 
 					_position.fromBufferAttribute( positionAttribute, i );
 
-					testPoint( _position, i, localThresholdSq, matrixWorld, raycaster, intersects, this );
+					testPoint(
+						_position,
+						i,
+						localThresholdSq,
+						matrixWorld,
+						raycaster,
+						intersects,
+						this
+					);
 
 				}
 
@@ -101,7 +124,9 @@ class Points extends Object3D {
 
 		} else {
 
-			console.error( 'THREE.Points.raycast() no longer supports THREE.Geometry. Use THREE.BufferGeometry instead.' );
+			console.error(
+				'THREE.Points.raycast() no longer supports THREE.Geometry. Use THREE.BufferGeometry instead.'
+			);
 
 		}
 
@@ -144,7 +169,9 @@ class Points extends Object3D {
 
 			if ( morphTargets !== undefined && morphTargets.length > 0 ) {
 
-				console.error( 'THREE.Points.updateMorphTargets() does not support THREE.Geometry. Use THREE.BufferGeometry instead.' );
+				console.error(
+					'THREE.Points.updateMorphTargets() does not support THREE.Geometry. Use THREE.BufferGeometry instead.'
+				);
 
 			}
 
@@ -154,9 +181,18 @@ class Points extends Object3D {
 
 }
 
+// js构造函数内和prototype上定义属性方法的区别；定义在prototype上能节省内存，定义在构造函数内的优先级更高
 Points.prototype.isPoints = true;
 
-function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, intersects, object ) {
+function testPoint(
+	point,
+	index,
+	localThresholdSq,
+	matrixWorld,
+	raycaster,
+	intersects,
+	object
+) {
 
 	const rayPointDistanceSq = _ray.distanceSqToPoint( point );
 
@@ -172,14 +208,12 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
 		if ( distance < raycaster.near || distance > raycaster.far ) return;
 
 		intersects.push( {
-
 			distance: distance,
 			distanceToRay: Math.sqrt( rayPointDistanceSq ),
 			point: intersectPoint,
 			index: index,
 			face: null,
-			object: object
-
+			object: object,
 		} );
 
 	}

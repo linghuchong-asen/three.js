@@ -29,10 +29,10 @@ class BoxGeometry extends BufferGeometry {
 
 		// buffers
 
-		const indices = [];
-		const vertices = [];
-		const normals = [];
-		const uvs = [];
+		const indices = []; // 记录顶点数据（position）
+		const vertices = []; // 记录索引数据(index)
+		const normals = []; // 记录法线数据
+		const uvs = []; // 记录纹理坐标
 
 		// helper variables
 
@@ -55,16 +55,17 @@ class BoxGeometry extends BufferGeometry {
 		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
 		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
 
+		/* buildPlane函数作用，将顶点位置，法向量，纹理坐标，顶点索引，四项数据储存进buffer数组中；顶点着色器也就是需要这四项数据，WebglRenderer渲染函数拿到这四项数据之后就可以再次组织数据，调用顶点着色器进行几何体绘制 */
 		function buildPlane( u, v, w, udir, vdir, width, height, depth, gridX, gridY, materialIndex ) {
 
-			const segmentWidth = width / gridX;
+			const segmentWidth = width / gridX; // 宽除以分段数，一段的长度
 			const segmentHeight = height / gridY;
 
-			const widthHalf = width / 2;
+			const widthHalf = width / 2; // 宽度的一半
 			const heightHalf = height / 2;
 			const depthHalf = depth / 2;
 
-			const gridX1 = gridX + 1;
+			const gridX1 = gridX + 1; // 分段数加1
 			const gridY1 = gridY + 1;
 
 			let vertexCounter = 0;
@@ -76,24 +77,28 @@ class BoxGeometry extends BufferGeometry {
 
 			for ( let iy = 0; iy < gridY1; iy ++ ) {
 
-				const y = iy * segmentHeight - heightHalf;
+				/* 因为坐标系的原点在立方体的中心点，所以减去长度的一半；用for循环的索引可以表示距离起点的远近，可以区分出不同的点 */
+				const y = iy * segmentHeight - heightHalf; // -7.5 1*15-7.5=7.5
 
 				for ( let ix = 0; ix < gridX1; ix ++ ) {
 
-					const x = ix * segmentWidth - widthHalf;
+					const x = ix * segmentWidth - widthHalf; // -7.5 1*15-7.5=7.5
 
-					// set values to correct vector component
-
-					vector[ u ] = x * udir;
-					vector[ v ] = y * vdir;
-					vector[ w ] = depthHalf;
+					// set values to correct vector component 设置值以校正矢量分量
+					/* uvw是形参，xyz是实参 */
+					/* 变换正负号，能实现变换点顺序的效果;结合点的索引能确定面正确的方向，three.js中逆时针旋转是面的正方向；
+					作者编写这段算法时，应该也是迭代了好几次才成现在这样，不然很难想象能一下子就知道这样写，或者对数学很敏感，能快速的找到顶点之间的规律；
+					再或者是借鉴了其他的库 */
+					vector[ u ] = x * udir; // 7.5 -7.5 z
+					vector[ v ] = y * vdir; // 7.5 -7.5 y
+					vector[ w ] = depthHalf; // 7.5 x
 
 					// now apply vector to vertex buffer
 
 					vertices.push( vector.x, vector.y, vector.z );
 
 					// set values to correct vector component
-
+					/* 法向量，因为面是平行于坐标轴的，所以一个方向的值就可以代表法向量 */
 					vector[ u ] = 0;
 					vector[ v ] = 0;
 					vector[ w ] = depth > 0 ? 1 : - 1;
@@ -103,7 +108,7 @@ class BoxGeometry extends BufferGeometry {
 					normals.push( vector.x, vector.y, vector.z );
 
 					// uvs
-
+					/* 纹理坐标 */
 					uvs.push( ix / gridX );
 					uvs.push( 1 - ( iy / gridY ) );
 
@@ -115,7 +120,7 @@ class BoxGeometry extends BufferGeometry {
 
 			}
 
-			// indices
+			// indices索引
 
 			// 1. you need three indices to draw a single face
 			// 2. a single segment consists of two faces

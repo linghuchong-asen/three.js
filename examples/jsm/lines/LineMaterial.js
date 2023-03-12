@@ -16,32 +16,27 @@ import {
 	ShaderMaterial,
 	UniformsLib,
 	UniformsUtils,
-	Vector2
+	Vector2,
 } from '../../../build/three.module.js';
 
-
 UniformsLib.line = {
-
 	worldUnits: { value: 1 },
 	linewidth: { value: 1 },
 	resolution: { value: new Vector2( 1, 1 ) },
 	dashOffset: { value: 0 },
 	dashScale: { value: 1 },
 	dashSize: { value: 1 },
-	gapSize: { value: 1 } // todo FIX - maybe change to totalSize
-
+	gapSize: { value: 1 }, // todo FIX - maybe change to totalSize
 };
 
 ShaderLib[ 'line' ] = {
-
 	uniforms: UniformsUtils.merge( [
 		UniformsLib.common,
 		UniformsLib.fog,
-		UniformsLib.line
+		UniformsLib.line,
 	] ),
 
-	vertexShader:
-	/* glsl */`
+	vertexShader: /* glsl */ `
 		#include <common>
 		#include <color_pars_vertex>
 		#include <fog_pars_vertex>
@@ -271,8 +266,7 @@ ShaderLib[ 'line' ] = {
 		}
 		`,
 
-	fragmentShader:
-	/* glsl */`
+	fragmentShader: /* glsl */ `
 		uniform vec3 diffuse;
 		uniform float opacity;
 		uniform float linewidth;
@@ -431,7 +425,7 @@ ShaderLib[ 'line' ] = {
 			#include <premultiplied_alpha_fragment>
 
 		}
-		`
+		`,
 };
 
 class LineMaterial extends ShaderMaterial {
@@ -439,7 +433,6 @@ class LineMaterial extends ShaderMaterial {
 	constructor( parameters ) {
 
 		super( {
-
 			type: 'LineMaterial',
 
 			uniforms: UniformsUtils.clone( ShaderLib[ 'line' ].uniforms ),
@@ -447,14 +440,13 @@ class LineMaterial extends ShaderMaterial {
 			vertexShader: ShaderLib[ 'line' ].vertexShader,
 			fragmentShader: ShaderLib[ 'line' ].fragmentShader,
 
-			clipping: true // required for clipping support
-
+			clipping: true, // required for clipping support
 		} );
 
 		Object.defineProperties( this, {
-
+			/* 以下是LineMaterial下面的属性 */
+			// 颜色
 			color: {
-
 				enumerable: true,
 
 				get: function () {
@@ -467,12 +459,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.diffuse.value = value;
 
-				}
-
+				},
 			},
 
 			worldUnits: {
-
 				enumerable: true,
 
 				get: function () {
@@ -493,12 +483,11 @@ class LineMaterial extends ShaderMaterial {
 
 					}
 
-				}
-
+				},
 			},
 
+			// 线宽
 			linewidth: {
-
 				enumerable: true,
 
 				get: function () {
@@ -511,12 +500,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.linewidth.value = value;
 
-				}
-
+				},
 			},
 
 			dashed: {
-
 				enumerable: true,
 
 				get: function () {
@@ -543,12 +530,10 @@ class LineMaterial extends ShaderMaterial {
 
 					}
 
-				}
-
+				},
 			},
 
 			dashScale: {
-
 				enumerable: true,
 
 				get: function () {
@@ -561,12 +546,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.dashScale.value = value;
 
-				}
-
+				},
 			},
 
 			dashSize: {
-
 				enumerable: true,
 
 				get: function () {
@@ -579,12 +562,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.dashSize.value = value;
 
-				}
-
+				},
 			},
 
 			dashOffset: {
-
 				enumerable: true,
 
 				get: function () {
@@ -597,12 +578,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.dashOffset.value = value;
 
-				}
-
+				},
 			},
 
 			gapSize: {
-
 				enumerable: true,
 
 				get: function () {
@@ -615,12 +594,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.gapSize.value = value;
 
-				}
-
+				},
 			},
 
 			opacity: {
-
 				enumerable: true,
 
 				get: function () {
@@ -633,12 +610,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.opacity.value = value;
 
-				}
-
+				},
 			},
 
 			resolution: {
-
 				enumerable: true,
 
 				get: function () {
@@ -651,12 +626,10 @@ class LineMaterial extends ShaderMaterial {
 
 					this.uniforms.resolution.value.copy( value );
 
-				}
-
+				},
 			},
 
 			alphaToCoverage: {
-
 				enumerable: true,
 
 				get: function () {
@@ -667,7 +640,9 @@ class LineMaterial extends ShaderMaterial {
 
 				set: function ( value ) {
 
-					if ( Boolean( value ) !== Boolean( 'USE_ALPHA_TO_COVERAGE' in this.defines ) ) {
+					if (
+						Boolean( value ) !== Boolean( 'USE_ALPHA_TO_COVERAGE' in this.defines )
+					) {
 
 						this.needsUpdate = true;
 
@@ -685,10 +660,8 @@ class LineMaterial extends ShaderMaterial {
 
 					}
 
-				}
-
-			}
-
+				},
+			},
 		} );
 
 		this.setValues( parameters );

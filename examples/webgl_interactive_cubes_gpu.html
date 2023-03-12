@@ -64,7 +64,8 @@
 				light.position.set( 0, 500, 2000 );
 				scene.add( light );
 
-				const pickingMaterial = new THREE.MeshBasicMaterial( { vertexColors: true } );
+				const pickingMaterial = new THREE.MeshBasicMaterial( { vertexColors: true } ); // vertexColors使用顶点设置颜色
+				// flatShading定义材质是否使用平面着色进行渲染
 				const defaultMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, vertexColors: true, shininess: 0	} );
 
 				function applyVertexColors( geometry, color ) {
@@ -109,8 +110,10 @@
 					scale.z = Math.random() * 200 + 100;
 
 					quaternion.setFromEuler( rotation );
+					// 设置将该对象位置 position，四元数quaternion 和 缩放scale 组合变换的矩阵。
 					matrix.compose( position, quaternion, scale );
-
+			
+					// 用给定矩阵转换几何体的顶点坐标。
 					geometry.applyMatrix4( matrix );
 
 					// give the geometry's vertices a random color, to be displayed

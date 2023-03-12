@@ -51,6 +51,7 @@
 
 					for ( let j = 0; j < length; j ++ ) {
 
+						// 用显示方程表示的几何形状
 						const u = i / width;
 						const v = j / length;
 						const x = u - 0.5;
@@ -80,6 +81,7 @@
 
 			}
 
+			// 生成点云物体
 			function generatePointcloud( color, width, length ) {
 
 				const geometry = generatePointCloudGeometry( color, width, length );
@@ -108,6 +110,7 @@
 
 				}
 
+				// 设置缓存的index
 				geometry.setIndex( new THREE.BufferAttribute( indices, 1 ) );
 
 				const material = new THREE.PointsMaterial( { size: pointSize, vertexColors: true } );
@@ -155,20 +158,31 @@
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.set( 10, 10, 10 );
 				camera.lookAt( scene.position );
+				// 更新局部变化
 				camera.updateMatrix();
 
-				//
-
+				const axes = new THREE.AxesHelper( 20 );
+				scene.add( axes );
+				const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+				const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+				const mesh = new THREE.Mesh( geometry, material );
+				mesh.position.set( 9, 0, 0 );
+				const mesh1 = mesh.clone();
+				mesh1.position.set( 0, 0, 9 );
+				scene.add( mesh );
+				scene.add( mesh1 );
+			
+				// 红色的部分
 				const pcBuffer = generatePointcloud( new THREE.Color( 1, 0, 0 ), width, length );
 				pcBuffer.scale.set( 5, 10, 10 );
 				pcBuffer.position.set( - 5, 0, 0 );
 				scene.add( pcBuffer );
-
+				// 中间绿色部分
 				const pcIndexed = generateIndexedPointcloud( new THREE.Color( 0, 1, 0 ), width, length );
 				pcIndexed.scale.set( 5, 10, 10 );
 				pcIndexed.position.set( 0, 0, 0 );
 				scene.add( pcIndexed );
-
+				// 青色部分
 				const pcIndexedOffset = generateIndexedWithOffsetPointcloud( new THREE.Color( 0, 1, 1 ), width, length );
 				pcIndexedOffset.scale.set( 5, 10, 10 );
 				pcIndexedOffset.position.set( 5, 0, 0 );
@@ -183,7 +197,9 @@
 
 				for ( let i = 0; i < 40; i ++ ) {
 
+					// 生成40个红色的球体
 					const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+					// 添加的这一个是页面刷新初始显示的那一个球
 					scene.add( sphere );
 					spheres.push( sphere );
 
@@ -215,6 +231,7 @@
 
 			function onPointerMove( event ) {
 
+			
 				pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
@@ -242,32 +259,45 @@
 
 				camera.applyMatrix4( rotateY );
 				camera.updateMatrixWorld();
-
 				raycaster.setFromCamera( pointer, camera );
-
+				// 判断与点云相交，不判断点云子代；只要鼠标放在点云内就会一直发生碰撞
+			
 				const intersections = raycaster.intersectObjects( pointclouds, false );
+				console.log( pointclouds );
 				intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
 
-				if ( toggle > 0.02 && intersection !== null ) {
+				 if ( toggle > 0.02 && intersection !== null ) {
 
+					/* 碰撞检测只是为了获取点坐标；刷新速率非常快小于0.02秒，可以认为随时都可以获取坐标；然后要做的就是给1~39个点依次赋予位置和大小，只有刷新到的一帧才会重新设置大小为1，其余的就会逐渐缩小为0；
+					思维误区：虽然sphere用一个数组spheres储存了，在数组中sphere也是有序的，但在空间中数组的顺序是没有任何意义的，空间中的顺序是位置；
+					为什么鼠标移动永远是里鼠标最近的是最大的一颗？因为鼠标位置就是碰撞检测的指向位置，在这一帧碰撞检测到的位置的那一颗就会重新缩放为1；至于这一颗球在数组中的序号是多少根本不重要，假如是3，那就从3开始之后的每一颗球都有机会得到新的位置与大小（鼠标一直发生移动或者自动旋转的情况）；鼠标不移动（关掉旋转）那么3之后的球都不会获得新的位置与大小，就会都叠在一个位置 */
+
+					// 让拖动的球体的某一个的位置，设为与点云相撞的位置
 					spheres[ spheresIndex ].position.copy( intersection.point );
+					// 恢复球体的初始大小
 					spheres[ spheresIndex ].scale.set( 1, 1, 1 );
+					// sphere.length一直是40；spheresIndex的值在1~39之间循环变动；spheres[0]只是在初始化出现了一次，之后就没有了，就只有39个点
 					spheresIndex = ( spheresIndex + 1 ) % spheres.length;
-
 					toggle = 0;
 
 				}
 
+			
+				/*  为什么初始的红球会消失？答：因为multiplyScalar不同于scale，所以缩放的基础是上一次的缩放的结果，一直乘以0.98最后就接近于0了；也是为什么会出现小尾巴的原因，因为没有上面的碰撞检测中的spheres[ spheresIndex ].scale.set( 1, 1, 1 );缩放为初始大小，那么就会都会消失了 */
 				for ( let i = 0; i < spheres.length; i ++ ) {
 
 					const sphere = spheres[ i ];
+					// Vector3上的方法，用该向量乘以0.98
+					// sphere.scale.set( 0.98, 0.98, 0.98 );
 					sphere.scale.multiplyScalar( 0.98 );
+					// Vector3上的方法，x,y,z任一分量上的值不能小于0.01，不能大于1
 					sphere.scale.clampScalar( 0.01, 1 );
+					// scene.add( sphere ); // 无需再次使用scene.add添加物体，因为spheres数组元素在定义的时候就add进场景了
+			
+	}
 
-				}
-
+				// 获取两帧之间的时间间隔，requestAnimationFrame()决定了两帧之间的时间间隔，但是这两帧之间的时间间隔用什么来获取呢，就是用的.getDelta()方法
 				toggle += clock.getDelta();
-
 				renderer.render( scene, camera );
 
 			}
